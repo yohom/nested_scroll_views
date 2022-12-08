@@ -29,12 +29,13 @@ class FlutterTabBarView extends StatefulWidget {
   const FlutterTabBarView({
     super.key,
     required this.children,
+    this.scrollDirection = Axis.horizontal,
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
     this.viewportFraction = 1.0,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(children != null),
+  })  : assert(children != null),
         assert(dragStartBehavior != null);
 
   /// This widget's selection and animation state.
@@ -42,6 +43,8 @@ class FlutterTabBarView extends StatefulWidget {
   /// If [TabController] is not provided, then the value of [DefaultTabController.of]
   /// will be used.
   final TabController? controller;
+
+  final Axis scrollDirection;
 
   /// One widget per tab.
   ///
@@ -90,15 +93,16 @@ class FlutterTabBarViewState extends State<FlutterTabBarView> {
   bool get _controllerIsValid => _controller?.animation != null;
 
   void _updateTabController() {
-    final TabController? newController = widget.controller ?? DefaultTabController.of(context);
+    final TabController? newController =
+        widget.controller ?? DefaultTabController.of(context);
     assert(() {
       if (newController == null) {
         throw FlutterError(
           'No TabController for ${widget.runtimeType}.\n'
-              'When creating a ${widget.runtimeType}, you must either provide an explicit '
-              'TabController using the "controller" property, or you must ensure that there '
-              'is a DefaultTabController above the ${widget.runtimeType}.\n'
-              'In this case, there was neither an explicit controller nor a default controller.',
+          'When creating a ${widget.runtimeType}, you must either provide an explicit '
+          'TabController using the "controller" property, or you must ensure that there '
+          'is a DefaultTabController above the ${widget.runtimeType}.\n'
+          'In this case, there was neither an explicit controller nor a default controller.',
         );
       }
       return true;
@@ -193,7 +197,8 @@ class FlutterTabBarViewState extends State<FlutterTabBarView> {
         return Future<void>.value();
       }
       _warpUnderwayCount += 1;
-      await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
+      await _pageController.animateToPage(_currentIndex!,
+          duration: duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
@@ -218,7 +223,8 @@ class FlutterTabBarViewState extends State<FlutterTabBarView> {
       return Future<void>.value();
     }
 
-    await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
+    await _pageController.animateToPage(_currentIndex!,
+        duration: duration, curve: Curves.ease);
     if (!mounted) {
       return Future<void>.value();
     }
@@ -243,17 +249,20 @@ class FlutterTabBarViewState extends State<FlutterTabBarView> {
     }
 
     _warpUnderwayCount += 1;
-    if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
+    if (notification is ScrollUpdateNotification &&
+        !_controller!.indexIsChanging) {
       if ((_pageController.page! - _controller!.index).abs() > 1.0) {
         _controller!.index = _pageController.page!.round();
-        _currentIndex =_controller!.index;
+        _currentIndex = _controller!.index;
       }
-      _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
+      _controller!.offset =
+          clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
       _controller!.index = _pageController.page!.round();
       _currentIndex = _controller!.index;
       if (!_controller!.indexIsChanging) {
-        _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
+        _controller!.offset =
+            clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
       }
     }
     _warpUnderwayCount -= 1;
@@ -274,7 +283,7 @@ class FlutterTabBarViewState extends State<FlutterTabBarView> {
         if (_controller!.length != widget.children.length) {
           throw FlutterError(
             "Controller's length property (${_controller!.length}) does not match the "
-                "number of children (${widget.children.length}) present in TabBarView's children property.",
+            "number of children (${widget.children.length}) present in TabBarView's children property.",
           );
         }
         return true;
@@ -291,6 +300,7 @@ class FlutterTabBarViewState extends State<FlutterTabBarView> {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: FlutterPageView(
+        scrollDirection: widget.scrollDirection,
         dragStartBehavior: widget.dragStartBehavior,
         clipBehavior: widget.clipBehavior,
         controller: _pageController,

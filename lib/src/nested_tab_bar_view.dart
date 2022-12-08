@@ -10,6 +10,7 @@ class NestedTabBarView extends FlutterTabBarView {
 
   const NestedTabBarView({
     super.key,
+    super.scrollDirection,
     required super.children,
     super.controller,
     super.physics,
